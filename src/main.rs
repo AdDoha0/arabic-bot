@@ -1,23 +1,29 @@
-use teloxide::prelude::*;
-// use teloxide::utils::command::BotCommands;
+use teloxide::{prelude::*, utils::command::BotCommands};
 use dotenv::dotenv;
 use std::env;
 
+
+// Импортируем обработчики
+mod handlers;
+use handlers::*;
+
 #[tokio::main]
 async fn main() {
+
     dotenv().ok();
     pretty_env_logger::init();
-    log::info!("Starting throw dice bot...");
+    log::info!("Starting bot...");
 
-    let token = env::var("BOT_TOKEN").expect("BOT_TOKEN not found in .env");
-    let bot = Bot::new(token);
+    let bot = Bot::new(env::var("BOT_TOKEN").expect("BOT_TOKEN not found"));
 
-    let handler = |bot: Bot, msg: Message| async move {
-        if let Err(err) = bot.send_dice(msg.chat.id).await {
-            log::error!("Error sending dice: {:?}", err);
-        }
-        Ok(())
-    };
+    // Используем обработчики из модуля handlers
+    let handler: Handler<'_, DependencyMap, Result<(), teloxide::RequestError>, teloxide::dispatching::DpHandlerDescription> = Update::filter_message()
+    .filter_command::<Command>()
+    .endpoint(command_handler);
 
-    teloxide::repl(bot, handler).await;
+    Dispatcher::builder(bot, handler)
+        .enable_ctrlc_handler()
+        .build()
+        .dispatch()
+        .await;
 }
