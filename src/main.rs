@@ -4,6 +4,7 @@ use std::env;
 
 
 // Импортируем обработчики
+mod ai;
 mod handlers;
 use handlers::*;
 
@@ -18,8 +19,8 @@ async fn main() {
 
     // Используем обработчики из модуля handlers
     let handler: Handler<'_, DependencyMap, Result<(), teloxide::RequestError>, teloxide::dispatching::DpHandlerDescription> = Update::filter_message()
-    .filter_command::<Command>()
-    .endpoint(command_handler);
+        .filter_command::<Command>()
+        .endpoint(command_handler);
 
     Dispatcher::builder(bot, handler)
         .enable_ctrlc_handler()

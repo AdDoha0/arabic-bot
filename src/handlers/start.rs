@@ -1,14 +1,16 @@
-
 use teloxide::{prelude::*, utils::command::BotCommands};
 
+use crate::ai::gpt_client::get_ai_completion;
 
 #[derive(BotCommands, Clone)]
 #[command(rename_rule = "lowercase", description = "These commands are supported:")]
 pub enum Command {
-    #[command(description = "throw dice.")]
+    #[command(description = "Bot info")]
     Help,
-    #[command(description = "start the bot.")]
+    #[command(description = "start the bot")]
     Start,
+    #[command(description = "Test function chat gpt")]
+    Test,
 }
 
 
@@ -19,7 +21,17 @@ pub async fn command_handler(bot: Bot, msg: Message, cmd: Command) -> ResponseRe
             bot.send_message(msg.chat.id, text).await?;
         }
         Command::Start => {
-            let text  = "Привет! Бот запущен.".to_string();
+            let text  = "Привет! Бот запущен".to_string();
+            bot.send_message(msg.chat.id, text).await?;
+        }
+        Command::Test => {
+            let text = match get_ai_completion("привет чат гпт").await {
+                Ok(text) => text,
+                Err(err) => {
+                    log::error!("Ошибка при получении ответа от OpenAI: {:?}", err);
+                    "Ошибка при получении ответа от OpenAI".to_string()
+                }
+            };
             bot.send_message(msg.chat.id, text).await?;
         }
     }
