@@ -21,7 +21,7 @@ pub struct CompletionRequest {
     pub messages: Vec<Message>
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 pub struct Message {
     pub role: String,
     pub content: String,

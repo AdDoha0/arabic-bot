@@ -1,7 +1,6 @@
 
 use super::serializers::{CompletionRequest, Message, CompletionResponse,};
 use reqwest::Client;
-use teloxide::types::Me;
 use std::env::var;
 
 // Request — это сообщение, которое клиент отправляет серверу
@@ -9,22 +8,35 @@ use std::env::var;
 
 
 
-struct History {
-    counter: i32,
-    messages: Vec<Message>,
+pub struct History {
+    pub messages: Vec<Message>,
 }
 
+impl History {
+    pub fn new() -> Self {
+        Self {
+            messages: Vec::new(),
+        }
+    }
 
+    pub fn add_message(&mut self, message: Message) {
+        self.messages.push(message);
+    }
 
-trait GetResultApiAi {
+}
+
+pub trait GetResultApiAi {
 
     fn get_history(&mut self) -> &mut History;
 
     async fn get_ai_completion(&mut self, prompt: &str) -> Result<String, Box<dyn std::error::Error>>;
 
-    async fn create_completion_request(&self, prompt: &str, context: &str) -> Result<CompletionRequest, Box<dyn std::error::Error>> {
+    pub async fn create_completion_request(&mut self, prompt: &str, context: &str) -> Result<CompletionRequest, Box<dyn std::error::Error>> {
+
         let ai_model = var("AI_MODEL").expect("Не удалось получить модель AI");
-        let request = CompletionRequest {
+        let history = self.get_history();
+
+        let mut request = CompletionRequest {
             model: ai_model,
             messages: vec![
                 Message {
@@ -34,9 +46,16 @@ trait GetResultApiAi {
                 Message {
                     role: "user".to_string(),
                     content: prompt.to_string(),
-                }
+                },
             ],
         };
+
+        if history.messages.len() > 0 {
+            for message in history.messages.iter() {
+                request.messages.push(message.clone());
+            }
+        };
+
         Ok(request)
     }
 
@@ -59,33 +78,3 @@ trait GetResultApiAi {
         Ok(response_data)
     }
 }
-
-
-struct CreatePractice {
-    history: History
-}
-
-impl GetResultApiAi for CreatePractice {
-
-    fn get_history(&mut self) -> &mut History {
-        &mut self.history
-    }
-
-    async fn get_ai_completion(&mut self, prompt: &str) -> Result<String, Box<dyn std::error::Error>> {
-        let context = "d".to_string();
-
-        let request = self.create_completion_request(prompt, &context).await?;
-        let response = self.send_request(request).await?;
-
-        let reply = match response.choices.first() {
-            Some(c) => c.message.content.clone(),
-            None => "API вернул пустой ответ".to_string(),
-        };
-
-        Ok(reply)
-    }
-}
-
-
-
-
