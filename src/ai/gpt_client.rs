@@ -7,7 +7,7 @@ use std::env::var;
 // Response — это сообщение, которое сервер отправляет клиенту в ответ на запрос.
 
 
-
+#[derive(Clone)]
 pub struct History {
     pub messages: Vec<Message>,
 }
@@ -31,7 +31,7 @@ pub trait GetResultApiAi {
 
     async fn get_ai_completion(&mut self, prompt: &str) -> Result<String, Box<dyn std::error::Error>>;
 
-    pub async fn create_completion_request(&mut self, prompt: &str, context: &str) -> Result<CompletionRequest, Box<dyn std::error::Error>> {
+    async fn create_completion_request(&mut self, prompt: &str, context: &str) -> Result<CompletionRequest, Box<dyn std::error::Error>> {
 
         let ai_model = var("AI_MODEL").expect("Не удалось получить модель AI");
         let history = self.get_history();

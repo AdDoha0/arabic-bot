@@ -15,7 +15,7 @@ use serde::{Deserialize, Serialize};
 // }
 
 // ---------------Request-----------------------
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 pub struct CompletionRequest {
     pub model: String,
     pub messages: Vec<Message>
