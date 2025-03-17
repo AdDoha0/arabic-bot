@@ -25,7 +25,7 @@ pub async fn command_handler(bot: Bot, msg: Message, cmd: Command) -> ResponseRe
             bot.send_message(msg.chat.id, text).await?;
         }
         Command::Test => {
-            let text = match get_ai_completion("привет чат гпт").await {
+            let text = match get_ai_completion("Hi").await {
                 Ok(text) => text,
                 Err(err) => {
                     log::error!("Ошибка при получении ответа от OpenAI: {:?}", err);
@@ -33,6 +33,7 @@ pub async fn command_handler(bot: Bot, msg: Message, cmd: Command) -> ResponseRe
                 }
             };
             bot.send_message(msg.chat.id, text).await?;
+
         }
     }
     Ok(())
