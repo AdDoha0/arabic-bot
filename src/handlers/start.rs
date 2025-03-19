@@ -1,5 +1,6 @@
 use teloxide::{prelude::*, utils::command::BotCommands};
 
+use crate::keyboard::keyboard::create_inline_keyboard_meeting_button;
 use crate::ai::{create_practice::CreatePractice, gpt_client::GetResultApiAi};
 
 #[derive(BotCommands, Clone)]
@@ -9,8 +10,6 @@ pub enum Command {
     Help,
     #[command(description = "start the bot")]
     Start,
-    #[command(description = "Test function chat gpt")]
-    Test,
 }
 
 
@@ -21,45 +20,25 @@ pub async fn command_handler(bot: Bot, msg: Message, cmd: Command) -> ResponseRe
             bot.send_message(msg.chat.id, text).await?;
         }
         Command::Start => {
-            let text  = "Привет! Бот запущен".to_string();
-            bot.send_message(msg.chat.id, text).await?;
+            let text  = "
+                Ассаляму алейкум! 🌙
+
+Ты в боте для изучения арабского языка.
+Твоя цель — шаг за шагом погружаться в мир арабского, улучшать разговорные навыки и чувствовать себя уверенно в общении.
+
+✨ Ждут упражнения, диалоги и новые слова.
+
+Готов начать обучение? Пиши /help, чтобы узнать больше или сразу выбери тему для практики.
+            ".to_string();
+            let keyboard = create_inline_keyboard_meeting_button();
+
+            bot.send_message(msg.chat.id, text)
+                .reply_markup(keyboard)
+                .await?;
         }
-        Command::Test => {
-            let mut practice = CreatePractice::new();
-
-            let text = match practice.get_ai_completion("Я мужчина 30 лет и я люблю ванильное мороженое").await {
-                Ok(text) => text,
-                Err(_) => "Ошибка при получении ответа от AI".to_string()
-            };
-
-            // Вывод истории в консоль после первого запроса
-            println!("История после get_ai_completion:");
-            for (i, msg) in practice.history.messages.iter().enumerate() {
-                println!("{}: [{}] {}", i, msg.role, msg.content);
-            }
-
-            // Второй вызов AI
-            let text2 = match practice.get_more_practice().await {
-                Ok(t) => t,
-                Err(_) => "Ошибка при получении ответа от AI".to_string()
-            };
-
-
-            println!("История после get_more_practice:");
-            for (i, msg) in practice.history.messages.iter().enumerate() {
-                println!("{}: [{}] {}", i, msg.role, msg.content);
-            }
-
-            // Отправляем оба ответа в чат
-            bot.send_message(msg.chat.id, text).await?;
-            bot.send_message(msg.chat.id, text2).await?;
-        }
-
     }
     Ok(())
 }
-
-
 
 
 // Обработчик для броска костей

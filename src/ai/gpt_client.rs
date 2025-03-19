@@ -1,11 +1,9 @@
-
 use super::serializers::{CompletionRequest, Message, CompletionResponse,};
 use reqwest::Client;
 use std::env::var;
 
 // Request — это сообщение, которое клиент отправляет серверу
 // Response — это сообщение, которое сервер отправляет клиенту в ответ на запрос.
-
 
 #[derive(Clone)]
 pub struct History {
@@ -89,7 +87,6 @@ pub trait GetResultApiAi {
                 content: context.to_string(),
             });
         }
-
 
         history.add_message(Message {
             role: "user".to_string(),

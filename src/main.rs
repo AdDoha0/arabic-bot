@@ -6,6 +6,7 @@ use std::env;
 // Импортируем обработчики
 mod ai;
 mod handlers;
+mod keyboard;
 use handlers::*;
 
 #[tokio::main]
