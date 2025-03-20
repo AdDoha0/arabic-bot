@@ -1,4 +1,4 @@
-pub mod keyboard;
+pub mod inline_keyboard;
 
 
 
