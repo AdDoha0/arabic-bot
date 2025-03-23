@@ -20,13 +20,13 @@ impl CallbackType {
             Self::Meeting
         } else if data.starts_with("volume") {
             Self::Volume
+        } else if data == "lesson_practice" {
+            Self::LessonPractice
         } else if data.starts_with("lesson") {
             Self::Lesson
         } else if data.starts_with("practice") {
             Self::Practice
-        } else if data.starts_with("lesson_practice") {
-            Self::LessonPractice
-        } else {
+        }else {
             Self::Unknown
         }
     }

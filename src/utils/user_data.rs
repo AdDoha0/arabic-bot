@@ -10,6 +10,7 @@ use once_cell::sync::Lazy;
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UserData {
     pub lesson_id: String,
+    pub lesson_text: String,
 }
 
 #[derive(Debug, Default, Serialize, Deserialize)]
@@ -56,8 +57,8 @@ impl UserDataCache {
     }
 
 
-    pub fn update_user_lesson(&mut self, chat_id: i64, lesson_id: String) {
-        self.users.insert(chat_id, UserData { lesson_id });
+    pub fn update_user_lesson(&mut self, chat_id: i64, lesson_id: String, lesson_text: String) {
+        self.users.insert(chat_id, UserData { lesson_id, lesson_text });
         self.dirty = true;
 
         // Периодически сохраняем на диск
@@ -70,8 +71,11 @@ impl UserDataCache {
         }
     }
 
+    pub fn get_user_lesson_text(&self, chat_id: i64) -> Option<String> {
+        self.users.get(&chat_id).map(|user_data| user_data.lesson_text.clone())
+    }
 
-    pub fn get_user_lesson(&self, chat_id: i64) -> Option<String> {
+    pub fn get_user_lesson_id(&self, chat_id: i64) -> Option<String> {
         self.users.get(&chat_id).map(|user_data| user_data.lesson_id.clone())
     }
 
@@ -86,15 +90,19 @@ impl UserDataCache {
 
 
 
-pub fn save_user_lesson(chat_id: i64, lesson_id: String) -> io::Result<()> {
+pub fn save_user_lesson(
+    chat_id: i64,
+    lesson_id: String,
+    lesson_text: String
+) -> io::Result<()> {
     let mut cache = CACHE.lock().unwrap();
-    cache.update_user_lesson(chat_id, lesson_id);
+    cache.update_user_lesson(chat_id, lesson_id, lesson_text);
     Ok(())
 }
 
-pub fn get_user_lesson(chat_id: i64) -> Option<String> {
+pub fn get_user_lesson_text(chat_id: i64) -> Option<String> {
     let cache = CACHE.lock().unwrap();
-    cache.get_user_lesson(chat_id)
+    cache.get_user_lesson_text(chat_id)
 }
 
 pub fn flush_cache() -> io::Result<()> {

@@ -45,7 +45,7 @@ pub fn create_inline_keyboard_сhoosing_lesson() -> InlineKeyboardMarkup {
 
 
 
-pub fn create_inline_keyboard_сhoosing_practice() -> InlineKeyboardMarkup {
+pub fn create_inline_keyboard_сhoosing_ai_assistent() -> InlineKeyboardMarkup {
     let button1 = InlineKeyboardButton::callback("Легко", "practice_state_easy");
     let button2 = InlineKeyboardButton::callback("Нормально", "practice_state_medium");
     let button3 = InlineKeyboardButton::callback("Сложно", "practice_state_hard");

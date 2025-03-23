@@ -5,6 +5,7 @@ use teloxide::{
 };
 
 use crate::keyboard::inline_keyboard::*;
+use crate::utils::user_data::{save_user_lesson, get_user_lesson_text};
 
 // Обработчик для кнопки начала обучения
 pub async fn handle_callback_meeting(bot: Bot, query: CallbackQuery) -> ResponseResult<()> {
@@ -41,7 +42,6 @@ pub async fn handle_callback_lesson(bot: Bot, query: CallbackQuery) -> ResponseR
         text: String,
     }
 
-
     let lesson = Lesson {
         text: "📚 *Урок: Идафная конструкция \\(الإضافة\\)*\n\n\
         🔤 *Определение:*\n\
@@ -66,8 +66,22 @@ pub async fn handle_callback_lesson(bot: Bot, query: CallbackQuery) -> ResponseR
     };
 
     if let Some(message) = query.message {
+        let chat_id = message.chat().id.0;
+
+        // Сохраняем ID урока и его текст
+        if let Some(data) = &query.data {
+            if let Err(e) = save_user_lesson(chat_id, data.clone(), lesson.text.clone()) {
+                log::warn!("Ошибка при сохранении урока: {}", e);
+            }
+        }
+
         bot.send_message(message.chat().id, lesson.text)
             .parse_mode(teloxide::types::ParseMode::MarkdownV2)
+            .await?;
+
+        let practice_keyboard = create_inline_keyboar_lesson_practice();
+        bot.send_message(message.chat().id, "Хотите практику по этому уроку?")
+            .reply_markup(practice_keyboard)
             .await?;
     }
 
@@ -75,7 +89,7 @@ pub async fn handle_callback_lesson(bot: Bot, query: CallbackQuery) -> ResponseR
 }
 
 
-// Обработчик для выбора практики
+
 pub async fn handle_callback_practice(bot: Bot, query: CallbackQuery) -> ResponseResult<()> {
 
     if let Some(message) = query.message {
@@ -88,11 +102,26 @@ pub async fn handle_callback_practice(bot: Bot, query: CallbackQuery) -> Respons
 }
 
 
-// pub async fn handle_callback_lesson_practice(bot: Bot, query: CallbackQuery) -> ResponseResult<()> {
+pub async fn handle_callback_lesson_practice(bot: Bot, query: CallbackQuery) -> ResponseResult<()> {
+    if let Some(message) = query.message {
 
-//     if let Some(message) = query.message {
-
-//     }
+        let chat_id = message.chat().id.0;
 
 
-// }
+        match get_user_lesson_text(chat_id) {
+            Some(lesson_text) => {
+                // Здесь у вас будет доступ к полному тексту урока
+                bot.send_message(message.chat().id,
+                    "Генерирую практику на основе изученного материала...").await?;
+
+                log::info!("Последний урок {}", lesson_text)
+            },
+            None => {
+                bot.send_message(message.chat().id,
+                    "Не могу найти текст урока. Пожалуйста, выберите урок снова.")
+                    .await?;
+            }
+        }
+    }
+    Ok(())
+}
