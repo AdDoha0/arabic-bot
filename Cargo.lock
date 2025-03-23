@@ -2482,6 +2482,7 @@ version = "0.1.0"
 dependencies = [
  "dotenv",
  "log",
+ "once_cell",
  "pretty_env_logger",
  "reqwest 0.12.14",
  "serde",

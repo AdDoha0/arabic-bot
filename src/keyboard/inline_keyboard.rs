@@ -59,6 +59,18 @@ pub fn create_inline_keyboard_сhoosing_practice() -> InlineKeyboardMarkup {
 
 
 
+
+pub fn create_inline_keyboar_lesson_practice() -> InlineKeyboardMarkup {
+    let button1 = InlineKeyboardButton::callback("Сгенирировать задания 🤖", "lesson_practice");
+
+    let row1 = vec![button1];
+
+    InlineKeyboardMarkup::new(vec![row1])
+
+}
+
+
+
 // pub fn create_inline_keyboard_start() -> InlineKeyboardMarkup {
 //     let mut  keyboard = InlineKeyboardMarkup::new(vec![]);
 

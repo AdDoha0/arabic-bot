@@ -10,6 +10,7 @@ pub enum CallbackType {
     Volume,
     Lesson,
     Practice,
+    LessonPractice,
     Unknown,
 }
 
@@ -23,6 +24,8 @@ impl CallbackType {
             Self::Lesson
         } else if data.starts_with("practice") {
             Self::Practice
+        } else if data.starts_with("lesson_practice") {
+            Self::LessonPractice
         } else {
             Self::Unknown
         }
@@ -30,56 +33,17 @@ impl CallbackType {
 }
 
 pub async fn handle_callback_query(bot: Bot, query: CallbackQuery) -> Result<(), RequestError> {
-    let data = query.data.clone().unwrap_or_else(|| String::from(""));
-    log::info!("Получен колбэк с данными: {}", data);
-
-    // Сразу отвечаем на callback query, чтобы убрать анимацию загрузки у кнопки
+    let data = query.data.clone().unwrap_or_default();
     bot.answer_callback_query(query.id.clone()).await?;
-    log::info!("Отправлен ответ на callback_query для снятия анимации загрузки");
 
-    let callback_type = CallbackType::from_data(&data);
-    log::info!("Определен тип колбэка: {:?}", match callback_type {
-        CallbackType::Meeting => "Meeting",
-        CallbackType::Volume => "Volume",
-        CallbackType::Lesson => "Lesson",
-        CallbackType::Practice => "Practice",
-        CallbackType::Unknown => "Unknown",
-    });
-
-    match callback_type {
-        CallbackType::Meeting => {
-            log::info!("Вызываем handle_callback_meeting");
-            if let Err(err) = handle_callback_meeting(bot, query).await {
-                log::error!("Ошибка в handle_callback_meeting: {:?}", err);
-                return Err(err);
-            }
-        },
-        CallbackType::Volume => {
-            log::info!("Вызываем handle_callback_volume");
-            if let Err(err) = handle_callback_volume(bot, query).await {
-                log::error!("Ошибка в handle_callback_volume: {:?}", err);
-                return Err(err);
-            }
-        },
-        CallbackType::Lesson => {
-            log::info!("Вызываем handle_callback_lesson");
-            if let Err(err) = handle_callback_lesson(bot, query).await {
-                log::error!("Ошибка в handle_callback_lesson: {:?}", err);
-                return Err(err);
-            }
-        },
-        CallbackType::Practice => {
-            log::info!("Вызываем handle_callback_practice");
-            if let Err(err) = handle_callback_practice(bot, query).await {
-                log::error!("Ошибка в handle_callback_practice: {:?}", err);
-                return Err(err);
-            }
-        },
-        CallbackType::Unknown => {
-            log::warn!("Неизвестный callback data: {}", data);
-        }
+    match CallbackType::from_data(&data) {
+        CallbackType::Meeting => handle_callback_meeting(bot, query).await?,
+        CallbackType::Volume => handle_callback_volume(bot, query).await?,
+        CallbackType::Lesson => handle_callback_lesson(bot, query).await?,
+        CallbackType::Practice => handle_callback_practice(bot, query).await?,
+        CallbackType::LessonPractice => handle_callback_lesson_practice(bot, query).await?,
+        CallbackType::Unknown => {}
     }
 
-    log::info!("Обработка колбэка завершена успешно");
     Ok(())
 }

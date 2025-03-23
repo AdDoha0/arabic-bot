@@ -9,6 +9,7 @@ use std::env;
 mod ai;
 mod handlers;
 mod keyboard;
+mod utils;
 
 use handlers::start::handle_callback_query;
 
