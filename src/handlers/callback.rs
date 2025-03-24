@@ -1,12 +1,14 @@
 use teloxide::{
     prelude::*,
     types::{CallbackQuery, Message},
-    utils::command::BotCommands,
+    utils::{self, command::BotCommands},
 };
 
 use crate::keyboard::inline_keyboard::*;
 use crate::utils::user_data::{save_user_lesson, get_user_lesson_text};
+use crate::utils::auxiliary_fn::escape_markdown;
 use crate::ai::CreatePractice;
+
 
 // Обработчик для кнопки начала обучения
 pub async fn handle_callback_meeting(bot: Bot, query: CallbackQuery) ->  ResponseResult<()> {
@@ -104,6 +106,9 @@ pub async fn handle_callback_practice(bot: Bot, query: CallbackQuery) ->  Respon
 
 
 pub async fn handle_callback_lesson_practice(bot: Bot, query: CallbackQuery) ->  ResponseResult<()> {
+
+    log::info!("Начало обработки колбэка 'handle_callback_lesson_practice");
+
     if let Some(message) = query.message {
 
         let chat_id = message.chat().id.0;
@@ -111,6 +116,12 @@ pub async fn handle_callback_lesson_practice(bot: Bot, query: CallbackQuery) -> 
 
         match get_user_lesson_text(chat_id) {
             Some(lesson_text) => {
+
+
+                let lesson_text = escape_markdown(&lesson_text);
+                log::info!("экранирование спец символов прошло успешно");
+
+                log::info!("Текст урока: {}", lesson_text);
 
                 bot.send_message(message.chat().id,
                     "Генерирую практику на основе изученного материала...").await?;
@@ -120,7 +131,10 @@ pub async fn handle_callback_lesson_practice(bot: Bot, query: CallbackQuery) -> 
                 match practie.get_more_practice(&lesson_text).await {
                     Ok(practice) => {
                         // Отправляем сгенерированную практику пользователю
-                        bot.send_message(message.chat().id, practice)
+                        let escaped_practice = escape_markdown(&practice);
+                        log::info!("экранирование спец символов прошло успешно");
+
+                        bot.send_message(message.chat().id, escaped_practice)
                             .parse_mode(teloxide::types::ParseMode::MarkdownV2)
                             .await?;
                     },
