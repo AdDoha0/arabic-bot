@@ -109,7 +109,7 @@ pub trait GetResultApiAi {
         &mut self,
         chat_id: i64,
         prompt: &str,
-    ) -> Result<String, Box<dyn std::error::Error>> {
+    ) -> Result<String, anyhow::Error> {
         let context = "Тренировка".to_string();
         let request = self.create_completion_request(chat_id, prompt, &context).await?;
         let response = self.send_request(request).await?;
@@ -134,7 +134,7 @@ pub trait GetResultApiAi {
         chat_id: i64,
         prompt: &str,
         context: &str,
-    ) -> Result<CompletionRequest, Box<dyn std::error::Error>> {
+    ) -> Result<CompletionRequest, anyhow::Error> {
         let ai_model = var("AI_MODEL").expect("Не удалось получить модель AI");
         let history = self.get_history_cache().get_or_create_history(chat_id);
 
@@ -164,7 +164,7 @@ pub trait GetResultApiAi {
     async fn send_request(
         &self,
         request: CompletionRequest,
-    ) -> Result<CompletionResponse, Box<dyn std::error::Error>> {
+    ) -> Result<CompletionResponse, anyhow::Error> {
         let api_key = var("AI_API_KEY").expect("Не удалось получить API ключ");
         let base_url = var("BASE_URL").expect("Не удалось получить URL API");
 

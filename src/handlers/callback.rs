@@ -103,42 +103,42 @@ pub async fn handle_callback_practice(bot: Bot, query: CallbackQuery) ->  Respon
 }
 
 
-// pub async fn handle_callback_lesson_practice(bot: Bot, query: CallbackQuery) ->  ResponseResult<()> {
-//     if let Some(message) = query.message {
+pub async fn handle_callback_lesson_practice(bot: Bot, query: CallbackQuery) ->  ResponseResult<()> {
+    if let Some(message) = query.message {
 
-//         let chat_id = message.chat().id.0;
+        let chat_id = message.chat().id.0;
 
 
-//         match get_user_lesson_text(chat_id) {
-//             Some(lesson_text) => {
+        match get_user_lesson_text(chat_id) {
+            Some(lesson_text) => {
 
-//                 bot.send_message(message.chat().id,
-//                     "Генерирую практику на основе изученного материала...").await?;
+                bot.send_message(message.chat().id,
+                    "Генерирую практику на основе изученного материала...").await?;
 
-//                 let mut practie = CreatePractice::new();
+                let mut practie = CreatePractice::new();
 
-//                 match practie.get_more_practice(&lesson_text).await {
-//                     Ok(practice) => {
-//                         // Отправляем сгенерированную практику пользователю
-//                         bot.send_message(message.chat().id, practice)
-//                             .parse_mode(teloxide::types::ParseMode::MarkdownV2)
-//                             .await?;
-//                     },
-//                     Err(e) => {
-//                         log::error!("Ошибка при генерации практики: {}", e);
-//                         bot.send_message(message.chat().id,
-//                             "Извините, произошла ошибка при генерации практики. Попробуйте позже.")
-//                             .await?;
-//                     }
-//                 }
-//                 log::info!("Последний урок: {}", lesson_text)
-//             },
-//             None => {
-//                 bot.send_message(message.chat().id,
-//                     "Не могу найти текст урока. Пожалуйста, выберите урок снова.")
-//                     .await?;
-//             }
-//         }
-//     }
-//     Ok(())
-// }
+                match practie.get_more_practice(&lesson_text).await {
+                    Ok(practice) => {
+                        // Отправляем сгенерированную практику пользователю
+                        bot.send_message(message.chat().id, practice)
+                            .parse_mode(teloxide::types::ParseMode::MarkdownV2)
+                            .await?;
+                    },
+                    Err(e) => {
+                        log::error!("Ошибка при генерации практики: {}", e);
+                        bot.send_message(message.chat().id,
+                            "Извините, произошла ошибка при генерации практики. Попробуйте позже.")
+                            .await?;
+                    }
+                }
+                log::info!("Последний урок: {}", lesson_text)
+            },
+            None => {
+                bot.send_message(message.chat().id,
+                    "Не могу найти текст урока. Пожалуйста, выберите урок снова.")
+                    .await?;
+            }
+        }
+    }
+    Ok(())
+}

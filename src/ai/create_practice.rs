@@ -17,7 +17,7 @@ impl CreatePractice {
         }
     }
 
-    pub async fn get_more_practice(&mut self, lesson_text: &str) -> Result<String, Box<dyn std::error::Error>> {
+    pub async fn get_more_practice(&mut self, lesson_text: &str) -> Result<String, anyhow::Error> {
         let ai_model = var("AI_MODEL").expect("Не удалось получить модель AI");
 
         // Формируем запрос, явно указывая не повторять предыдущие практики
