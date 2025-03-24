@@ -10,19 +10,21 @@ pub enum CallbackType {
     Volume,
     Lesson,
     Practice,
-    LessonPractice,
+    // LessonPractice,
     Unknown,
 }
 
 impl CallbackType {
-    fn from_data(data: &str) -> Self {
+    pub fn from_data(data: &str) -> Self {
         if data.starts_with("meeting") {
             Self::Meeting
         } else if data.starts_with("volume") {
             Self::Volume
-        } else if data == "lesson_practice" {
-            Self::LessonPractice
-        } else if data.starts_with("lesson") {
+        }
+        // else if data == "lesson_practice" {
+        //     Self::LessonPractice
+        // }
+        else if data.starts_with("lesson") {
             Self::Lesson
         } else if data.starts_with("practice") {
             Self::Practice
@@ -32,7 +34,7 @@ impl CallbackType {
     }
 }
 
-pub async fn handle_callback_query(bot: Bot, query: CallbackQuery) -> Result<(), RequestError> {
+pub async fn handle_callback_query(bot: Bot, query: CallbackQuery) ->  ResponseResult<()>  {
     let data = query.data.clone().unwrap_or_default();
     bot.answer_callback_query(query.id.clone()).await?;
 
@@ -41,7 +43,7 @@ pub async fn handle_callback_query(bot: Bot, query: CallbackQuery) -> Result<(),
         CallbackType::Volume => handle_callback_volume(bot, query).await?,
         CallbackType::Lesson => handle_callback_lesson(bot, query).await?,
         CallbackType::Practice => handle_callback_practice(bot, query).await?,
-        CallbackType::LessonPractice => handle_callback_lesson_practice(bot, query).await?,
+        // CallbackType::LessonPractice => handle_callback_lesson_practice(bot, query).await?,
         CallbackType::Unknown => {}
     }
 

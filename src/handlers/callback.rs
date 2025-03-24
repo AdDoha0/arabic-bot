@@ -6,9 +6,10 @@ use teloxide::{
 
 use crate::keyboard::inline_keyboard::*;
 use crate::utils::user_data::{save_user_lesson, get_user_lesson_text};
+use crate::ai::CreatePractice;
 
 // Обработчик для кнопки начала обучения
-pub async fn handle_callback_meeting(bot: Bot, query: CallbackQuery) -> ResponseResult<()> {
+pub async fn handle_callback_meeting(bot: Bot, query: CallbackQuery) ->  ResponseResult<()> {
 
     if let Some(message) = query.message {
         let keyboard = create_inline_keyboard_сhoosing_volume();
@@ -23,7 +24,7 @@ pub async fn handle_callback_meeting(bot: Bot, query: CallbackQuery) -> Response
 }
 
 // Обработчик для выбора тома
-pub async fn handle_callback_volume(bot: Bot, query: CallbackQuery) -> ResponseResult<()> {
+pub async fn handle_callback_volume(bot: Bot, query: CallbackQuery) ->  ResponseResult<()> {
 
     if let Some(message) = query.message {
         let keyboard = create_inline_keyboard_сhoosing_lesson();
@@ -37,7 +38,7 @@ pub async fn handle_callback_volume(bot: Bot, query: CallbackQuery) -> ResponseR
 }
 
 // Обработчик для выбора урока
-pub async fn handle_callback_lesson(bot: Bot, query: CallbackQuery) -> ResponseResult<()> {
+pub async fn handle_callback_lesson(bot: Bot, query: CallbackQuery) ->  ResponseResult<()> {
     struct Lesson {
         text: String,
     }
@@ -90,7 +91,7 @@ pub async fn handle_callback_lesson(bot: Bot, query: CallbackQuery) -> ResponseR
 
 
 
-pub async fn handle_callback_practice(bot: Bot, query: CallbackQuery) -> ResponseResult<()> {
+pub async fn handle_callback_practice(bot: Bot, query: CallbackQuery) ->  ResponseResult<()> {
 
     if let Some(message) = query.message {
         // В будущем тут можно добавить логику для разных типов практики
@@ -102,26 +103,42 @@ pub async fn handle_callback_practice(bot: Bot, query: CallbackQuery) -> Respons
 }
 
 
-pub async fn handle_callback_lesson_practice(bot: Bot, query: CallbackQuery) -> ResponseResult<()> {
-    if let Some(message) = query.message {
+// pub async fn handle_callback_lesson_practice(bot: Bot, query: CallbackQuery) ->  ResponseResult<()> {
+//     if let Some(message) = query.message {
 
-        let chat_id = message.chat().id.0;
+//         let chat_id = message.chat().id.0;
 
 
-        match get_user_lesson_text(chat_id) {
-            Some(lesson_text) => {
-                // Здесь у вас будет доступ к полному тексту урока
-                bot.send_message(message.chat().id,
-                    "Генерирую практику на основе изученного материала...").await?;
+//         match get_user_lesson_text(chat_id) {
+//             Some(lesson_text) => {
 
-                log::info!("Последний урок {}", lesson_text)
-            },
-            None => {
-                bot.send_message(message.chat().id,
-                    "Не могу найти текст урока. Пожалуйста, выберите урок снова.")
-                    .await?;
-            }
-        }
-    }
-    Ok(())
-}
+//                 bot.send_message(message.chat().id,
+//                     "Генерирую практику на основе изученного материала...").await?;
+
+//                 let mut practie = CreatePractice::new();
+
+//                 match practie.get_more_practice(&lesson_text).await {
+//                     Ok(practice) => {
+//                         // Отправляем сгенерированную практику пользователю
+//                         bot.send_message(message.chat().id, practice)
+//                             .parse_mode(teloxide::types::ParseMode::MarkdownV2)
+//                             .await?;
+//                     },
+//                     Err(e) => {
+//                         log::error!("Ошибка при генерации практики: {}", e);
+//                         bot.send_message(message.chat().id,
+//                             "Извините, произошла ошибка при генерации практики. Попробуйте позже.")
+//                             .await?;
+//                     }
+//                 }
+//                 log::info!("Последний урок: {}", lesson_text)
+//             },
+//             None => {
+//                 bot.send_message(message.chat().id,
+//                     "Не могу найти текст урока. Пожалуйста, выберите урок снова.")
+//                     .await?;
+//             }
+//         }
+//     }
+//     Ok(())
+// }
