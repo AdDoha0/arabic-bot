@@ -116,36 +116,35 @@ pub async fn handle_callback_lesson_practice(bot: Bot, query: CallbackQuery) -> 
 
         match get_user_lesson_text(chat_id) {
             Some(lesson_text) => {
+                // Здесь можно использовать lesson_text (последний урок пользователя)
 
+                log::info!("Текст урока | последний урок открытый пользователем: {}", lesson_text);
 
-                let lesson_text = escape_markdown(&lesson_text);
-                log::info!("экранирование спец символов прошло успешно");
-
-                log::info!("Текст урока: {}", lesson_text);
+                // let escaped_lesson_text = escape_markdown(&lesson_text);
 
                 bot.send_message(message.chat().id,
                     "Генерирую практику на основе изученного материала...").await?;
 
+
                 let mut practie = CreatePractice::new();
 
-                match practie.get_more_practice(&lesson_text).await {
+                match practie.get_more_practice(chat_id, &lesson_text).await {
                     Ok(practice) => {
-                        // Отправляем сгенерированную практику пользователю
-                        let escaped_practice = escape_markdown(&practice);
-                        log::info!("экранирование спец символов прошло успешно");
+                        // let escaped_practice = escape_markdown(&practice);
+                        // log::info!("экранирование спец символов прошло успешно");
 
-                        bot.send_message(message.chat().id, escaped_practice)
-                            .parse_mode(teloxide::types::ParseMode::MarkdownV2)
-                            .await?;
-                    },
+                        bot.send_message(message.chat().id, practice)
+                        //    .parse_mode(teloxide::types::ParseMode::MarkdownV2)
+                           .await?;
+                        log::info!("Практика успешно сгенерирована и отправлена пользователю");
+                    }
                     Err(e) => {
                         log::error!("Ошибка при генерации практики: {}", e);
                         bot.send_message(message.chat().id,
                             "Извините, произошла ошибка при генерации практики. Попробуйте позже.")
-                            .await?;
+                           .await?;
                     }
                 }
-                log::info!("Последний урок: {}", lesson_text)
             },
             None => {
                 bot.send_message(message.chat().id,

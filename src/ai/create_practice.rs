@@ -1,6 +1,9 @@
 use super::serializers::{CompletionRequest, CompletionResponse};
-use super::gpt_client::{GetResultApiAi, History, Message, HistoryCache};
-use std::env::var;
+use super::gpt_client::{GetResultApiAi, History, HistoryCache};
+
+
+
+
 
 pub struct CreatePractice {
     pub history: History,
@@ -12,60 +15,28 @@ impl CreatePractice {
     pub fn new() -> Self {
         Self {
             history: History::new(),
-            context: "Тренировка".to_string(),
+            context: "Ты - преподаватель арабского языка. Создавай уникальные практические задания \
+                     на основе материала урока. Каждая практика должна быть новой и отличаться от \
+                     предыдущих. Используй разные форматы заданий для лучшего усвоения материала.".to_string(),
             history_cache: HistoryCache::new(),
         }
     }
 
-    pub async fn get_more_practice(&mut self, lesson_text: &str) -> Result<String, anyhow::Error> {
-        let ai_model = var("AI_MODEL").expect("Не удалось получить модель AI");
+    pub async fn get_more_practice(&mut self, chat_id: i64, lesson_text: &str) -> Result<String, anyhow::Error> {
+        let unique_id = format!("{}_{}", chat_id, lesson_text.chars().take(20).collect::<String>());
 
-        // Формируем запрос, явно указывая не повторять предыдущие практики
         let prompt = format!(
-            "Создай новую практику по уроку: {}. \
-            Эта практика должна отличаться от предыдущих практик в истории. \
-            Сделай упражнения разнообразными и интересными.",
+            "Урок: {}\n\
+            Создай новую практику по этому уроку.\n\
+            Практика должна:\n\
+            1. Строго соответствовать материалу урока\n\
+            2. Отличаться от предыдущих практик\n\
+            3. Содержать разнообразные упражнения\n\
+            4. Быть понятной и структурированной",
             lesson_text
         );
 
-        // Проверяем, добавлено ли системное сообщение
-        if self.history.messages.iter().all(|m| m.role != "system") {
-            self.history.add_message(Message {
-                role: "system".to_string(),
-                content: self.context.clone(),
-            });
-        }
-
-        // Добавляем новый запрос от пользователя
-        self.history.add_message(Message {
-            role: "user".to_string(),
-            content: prompt.clone(),
-        });
-
-        Self::trim_history(&mut self.history.messages);
-
-        // Отправка запроса в API
-        let request = CompletionRequest {
-            model: ai_model,
-            messages: self.history.messages.clone().into_iter().map(|m| super::serializers::Message {
-                role: m.role,
-                content: m.content,
-            }).collect(),
-        };
-
-        let response = self.send_request(request).await?;
-        let reply = match response.choices.first() {
-            Some(c) => c.message.content.clone(),
-            None => "API вернул пустой ответ".to_string(),
-        };
-
-        // Добавляем ответ ассистента в историю
-        self.history.add_message(Message {
-            role: "assistant".to_string(),
-            content: reply.clone(),
-        });
-
-        Ok(reply)
+        self.get_ai_completion(chat_id, &prompt, &unique_id).await
     }
 }
 
