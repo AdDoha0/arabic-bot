@@ -10,6 +10,7 @@ mod ai;
 mod handlers;
 mod keyboard;
 mod utils;
+mod serializers;
 
 use handlers::start::handle_callback_query;
 

@@ -10,11 +10,13 @@ use crate::utils::auxiliary_fn::escape_markdown;
 use crate::ai::CreatePractice;
 
 
+
+
 // Обработчик для кнопки начала обучения
 pub async fn handle_callback_meeting(bot: Bot, query: CallbackQuery) ->  ResponseResult<()> {
 
     if let Some(message) = query.message {
-        let keyboard = create_inline_keyboard_сhoosing_volume();
+        let keyboard = create_inline_keyboard_сhoosing_volume().await;
         bot.send_message(message.chat().id, "Выберите действие:")
             .reply_markup(keyboard)
             .await?;
@@ -79,7 +81,7 @@ pub async fn handle_callback_lesson(bot: Bot, query: CallbackQuery) ->  Response
         }
 
         bot.send_message(message.chat().id, lesson.text)
-            .parse_mode(teloxide::types::ParseMode::MarkdownV2)
+            // .parse_mode(teloxide::types::ParseMode::MarkdownV2)
             .await?;
 
         let practice_keyboard = create_inline_keyboar_lesson_practice();
@@ -133,8 +135,11 @@ pub async fn handle_callback_lesson_practice(bot: Bot, query: CallbackQuery) -> 
                         // let escaped_practice = escape_markdown(&practice);
                         // log::info!("экранирование спец символов прошло успешно");
 
+                        log::info!("Отправляю практику пользователю");
+                        log::info!("Практика: {}", practice);
+
                         bot.send_message(message.chat().id, practice)
-                        //    .parse_mode(teloxide::types::ParseMode::MarkdownV2)
+                           .parse_mode(teloxide::types::ParseMode::MarkdownV2)
                            .await?;
                         log::info!("Практика успешно сгенерирована и отправлена пользователю");
                     }
