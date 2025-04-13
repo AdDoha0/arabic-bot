@@ -6,16 +6,22 @@ use teloxide::{
 use dotenv::dotenv;
 use std::env;
 
+
+
 mod ai;
 mod handlers;
 mod keyboard;
 mod utils;
 mod serializers;
+mod tests;
+
 
 use handlers::start::handle_callback_query;
 
 // Удаляем #[tokio::main] чтобы вручную настроить рантайм
 fn main() {
+
+
     // Инициализация переменных окружения и логгера
     dotenv().ok();
 
@@ -33,6 +39,16 @@ fn main() {
         .enable_all()
         .build()
         .expect("Не удалось создать рантайм");
+
+
+
+    // cargo run -- --test
+
+    if std::env::args().any(|arg| arg == "--test") {
+            rt.block_on(tests::run_test());
+            return;
+        }
+
 
     // Запускаем асинхронную функцию внутри рантайма
     rt.block_on(async {
@@ -67,3 +83,5 @@ fn main() {
         log::info!("Бот остановлен");
     });
 }
+
+

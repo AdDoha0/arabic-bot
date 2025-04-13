@@ -4,7 +4,7 @@ use teloxide::types::ReplyMarkup;
 use reqwest;
 use std::env;
 
-use crate::serializers::Textbook;
+use crate::serializers::{Textbook, LessonId};
 
 
 pub fn create_inline_keyboard_meeting_button() -> InlineKeyboardMarkup {
@@ -58,22 +58,38 @@ pub async fn create_inline_keyboard_сhoosing_volume() -> InlineKeyboardMarkup{
 
 
 
+pub async fn create_inline_keyboard_сhoosing_lesson(textbook_id: u32) -> InlineKeyboardMarkup {
+    let mut url = env::var("BECKEND_URL").expect("BECKEND_URL is not set");
+    url.push_str(&format!("/textbooks/{textbook_id}/lessons"));
 
+    let client = reqwest::Client::new();
+    let lessons: Vec<LessonId> = match client
+       .get(url)
+       .send()
+       .await {
+           Ok(response) => response.json().await.unwrap_or_default(),
+           Err(_) => Vec::new(),
+       };
 
+    let mut keyboard = Vec::new();
 
+    for lesson in lessons {
+        let button = InlineKeyboardButton::callback(
+            &lesson.title,
+            format!("lesson_{}", lesson.id)
+        );
+        keyboard.push(vec![button]);
+    }
 
+    InlineKeyboardMarkup::new(keyboard)
 
-pub fn create_inline_keyboard_сhoosing_lesson() -> InlineKeyboardMarkup {
-    let button1 = InlineKeyboardButton::callback("Урок 1", "lesson_1");
-    let button2 = InlineKeyboardButton::callback("Урок 2", "lesson_2");
-    let button3 = InlineKeyboardButton::callback("Урок 3", "lesson_3");
-
-    let row1 = vec![button1];
-    let row2 = vec![button2];
-    let row3 = vec![button3];
-
-    InlineKeyboardMarkup::new(vec![row1, row2, row3])
 }
+
+
+
+
+
+
 
 
 

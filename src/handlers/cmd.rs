@@ -2,7 +2,7 @@ use teloxide::dispatching::dialogue::GetChatId;
 use teloxide::{prelude::*, utils::command::BotCommands};
 
 use crate::keyboard::inline_keyboard::create_inline_keyboard_meeting_button;
-use crate::ai::{create_practice::CreatePractice, gpt_client::GetResultApiAi};
+// use crate::ai::{create_practice::CreatePractice, gpt_client::GetResultApiAi};
 
 
 

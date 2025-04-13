@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+// пример ответа на запрос к апи
 // {
 //     "model": "CohereForAI/c4ai-command-r-plus-08-2024",
 //     "messages": [
