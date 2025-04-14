@@ -1,18 +1,20 @@
 use teloxide::{
-    RequestError,
     prelude::*,
-    types::{CallbackQuery, Message},
-    utils::{self, command::BotCommands},
+    types::{CallbackQuery, Message}
 };
 use reqwest;
 use std::env;
+use teloxide::RequestError;
+use std::io;
 
-
-use crate::keyboard::inline_keyboard::*;
-use crate::utils::user_data::{save_user_lesson, get_user_lesson_text};
-use crate::utils::auxiliary_fn::escape_markdown;
-// use crate::ai::CreatePractice;
+use crate::{ai::gpt_client::GptClient, keyboard::inline_keyboard::*};
+use crate::utils::user_data::{save_user_lesson};
 use crate::serializers::{Lesson};
+use crate::utils::load_context;
+
+
+use crate::ai::create_practice::CreatePractice;
+use crate::utils::user_data::get_user_lesson_text;
 
 
 // Обработчик для кнопки начала обучения
@@ -119,59 +121,45 @@ pub async fn handle_callback_practice(bot: Bot, query: CallbackQuery) ->  Respon
 }
 
 
+pub async fn handle_callback_lesson_practice(bot: Bot, query: CallbackQuery) -> ResponseResult<()> {
+
+    if let Some(message) = query.message {
+        // Отправляем сообщение "Пожалуйста, подождите..." и сохраняем его чтоб удалить его позже
+        let waiting_message: Message = bot
+            .send_message(message.chat().id, "Пожалуйста, подождите...")
+            .await?;
+
+        let context = load_context()
+            .await
+            .map_err(|e| RequestError::from(io::Error::new(io::ErrorKind::Other, e)))?;
+
+        let lesson_text = match get_user_lesson_text(message.chat().id.0) {
+            Some(text) => text,
+            None => {
+                log::warn!("У пользователя нет выбранного урока");
+                return Ok(());
+            }
+        };
+
+        let client = CreatePractice {};
+        let response = client
+            .get_completion(&lesson_text, &context)
+            .await
+            .map_err(|e| RequestError::from(io::Error::new(io::ErrorKind::Other, e)))?;
+
+        log::info!("Отправлен урок  API");
 
 
-
-// pub async fn handle_callback_lesson_practice(bot: Bot, query: CallbackQuery) ->  ResponseResult<()> {
-
-//     log::info!("Начало обработки колбэка 'handle_callback_lesson_practice");
-
-//     if let Some(message) = query.message {
-
-//         let chat_id = message.chat().id.0;
+         // Удаляем сообщение "Пожалуйста, подождите..."
+         bot.delete_message(waiting_message.chat.id, waiting_message.id)
+            .await?;
 
 
-//         match get_user_lesson_text(chat_id) {
-//             Some(lesson_text) => {
-//                 // Здесь можно использовать lesson_text (последний урок пользователя)
+        bot.send_message(message.chat().id, response)
+           .await?;
 
-//                 log::info!("Текст урока | последний урок открытый пользователем: {}", lesson_text);
+    }
 
-//                 // let escaped_lesson_text = escape_markdown(&lesson_text);
+    Ok(())
+}
 
-//                 bot.send_message(message.chat().id,
-//                     "Генерирую практику на основе изученного материала...").await?;
-
-
-//                 let mut practie = CreatePractice::new();
-
-//                 match practie.get_more_practice(chat_id, &lesson_text).await {
-//                     Ok(practice) => {
-//                         // let escaped_practice = escape_markdown(&practice);
-//                         // log::info!("экранирование спец символов прошло успешно");
-
-//                         log::info!("Отправляю практику пользователю");
-//                         log::info!("Практика: {}", practice);
-
-//                         bot.send_message(message.chat().id, practice)
-//                            .parse_mode(teloxide::types::ParseMode::MarkdownV2)
-//                            .await?;
-//                         log::info!("Практика успешно сгенерирована и отправлена пользователю");
-//                     }
-//                     Err(e) => {
-//                         log::error!("Ошибка при генерации практики: {}", e);
-//                         bot.send_message(message.chat().id,
-//                             "Извините, произошла ошибка при генерации практики. Попробуйте позже.")
-//                            .await?;
-//                     }
-//                 }
-//             },
-//             None => {
-//                 bot.send_message(message.chat().id,
-//                     "Не могу найти текст урока. Пожалуйста, выберите урок снова.")
-//                     .await?;
-//             }
-//         }
-//     }
-//     Ok(())
-// }

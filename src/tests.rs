@@ -1,6 +1,3 @@
-
-
-
 use crate::ai::gpt_client::GptClient;
 use async_trait::async_trait;
 

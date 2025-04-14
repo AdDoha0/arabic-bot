@@ -5,12 +5,13 @@ use teloxide::RequestError;
 use super::callback::*;
 use crate::keyboard::inline_keyboard::*;
 
+
 pub enum CallbackType {
     Meeting,
     Volume,
     Lesson,
     Practice,
-    // LessonPractice,
+    LessonPractice,
     // Test,
     Unknown,
 }
@@ -22,9 +23,9 @@ impl CallbackType {
         } else if data.starts_with("volume") {
             Self::Volume
         }
-        // else if data == "lesson_practice" {
-        //     Self::LessonPractice
-        // }
+        else if data == "lesson_practice" {
+            Self::LessonPractice
+        }
         else if data.starts_with("lesson") {
             Self::Lesson
         } else if data.starts_with("practice") {
@@ -44,7 +45,7 @@ pub async fn handle_callback_query(bot: Bot, query: CallbackQuery) ->  ResponseR
         CallbackType::Volume => handle_callback_volume(bot, query).await?,
         CallbackType::Lesson => handle_callback_lesson(bot, query).await?,
         CallbackType::Practice => handle_callback_practice(bot, query).await?,
-        // CallbackType::LessonPractice => handle_callback_lesson_practice(bot, query).await.expect("Failed to handle callback lesson practice"),
+        CallbackType::LessonPractice => handle_callback_lesson_practice(bot, query).await?,
         CallbackType::Unknown => {}
     }
 

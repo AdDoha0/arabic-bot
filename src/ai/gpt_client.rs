@@ -1,7 +1,5 @@
-use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
+
 use reqwest::Client;
-use std::env::var;
 
 use super::serializers::{CompletionRequest, CompletionResponse};
 use super::serializers::Message;

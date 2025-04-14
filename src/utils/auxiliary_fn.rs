@@ -1,19 +1,8 @@
+use anyhow::{Result, Context}; // Для работы с anyhow
 
 
-pub fn escape_markdown(text: &str) -> String {
-    let reserved = [
-        '_', '*', '[', ']', '(', ')', '~', '`', '>', '#',
-        '+', '-', '=', '|', '{', '}', '.', '!', ':', '\\' // Добавил `:` и `\`
-    ];
-    let mut escaped = String::with_capacity(text.len());
-
-    for c in text.chars() {
-        if reserved.contains(&c) {
-            escaped.push('\\');
-        }
-        escaped.push(c);
-    }
-
-    escaped
+pub async fn load_context() -> Result<String> {
+    tokio::fs::read_to_string("src/assets/context.txt")
+        .await
+        .context("Не удалось загрузить контекст из файла") // Добавляем контекст для ошибок
 }
-
