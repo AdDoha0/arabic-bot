@@ -4,7 +4,7 @@ use teloxide::types::ReplyMarkup;
 use reqwest;
 use std::env;
 
-use crate::serializers::{Textbook, LessonId};
+use crate::serializers::{Textbook, LessonId, Lesson};
 
 
 pub fn create_inline_keyboard_meeting_button() -> InlineKeyboardMarkup {
@@ -60,15 +60,28 @@ pub async fn create_inline_keyboard_сhoosing_volume() -> InlineKeyboardMarkup{
 
 pub async fn create_inline_keyboard_сhoosing_lesson(textbook_id: u32) -> InlineKeyboardMarkup {
     let mut url = env::var("BECKEND_URL").expect("BECKEND_URL is not set");
-    url.push_str(&format!("/textbooks/{textbook_id}/lessons"));
+    url.push_str(&format!("/lessons?textbook_id={}", textbook_id));
 
     let client = reqwest::Client::new();
-    let lessons: Vec<LessonId> = match client
+    let lessons: Vec<Lesson> = match client
        .get(url)
        .send()
        .await {
-           Ok(response) => response.json().await.unwrap_or_default(),
-           Err(_) => Vec::new(),
+           Ok(response) => {
+               let text = response.text().await.unwrap_or_default();
+               log::info!("Ответ от сервера для списка уроков: {}", text);
+               match serde_json::from_str::<Vec<Lesson>>(&text) {
+                   Ok(lessons) => lessons,
+                   Err(e) => {
+                       log::error!("Ошибка при десериализации списка уроков: {}", e);
+                       Vec::new()
+                   }
+               }
+           },
+           Err(e) => {
+               log::error!("Ошибка при запросе списка уроков: {}", e);
+               Vec::new()
+           }
        };
 
     let mut keyboard = Vec::new();
@@ -82,12 +95,7 @@ pub async fn create_inline_keyboard_сhoosing_lesson(textbook_id: u32) -> Inline
     }
 
     InlineKeyboardMarkup::new(keyboard)
-
 }
-
-
-
-
 
 
 

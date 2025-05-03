@@ -22,6 +22,7 @@ pub struct Lesson {
     pub text: String,
     pub video_url: Option<String>,
     pub textbook_id: i32,
+    pub created_at: String,
 }
 
 
@@ -34,6 +35,7 @@ impl Default for Lesson {
             text: String::new(),
             video_url: None,
             textbook_id: 0,
+            created_at: String::new(),
         }
     }
 }

@@ -73,11 +73,25 @@ pub async fn handle_callback_lesson(bot: Bot, query: CallbackQuery) ->  Response
 
 
     let client = reqwest::Client::new();
+    let url = format!("{}/lessons/{}", env::var("BECKEND_URL").unwrap(), lesson_id);
+    log::info!("Запрос к URL: {}", url);
+    
     let lesson: Lesson = match client
-       .get(format!("{}/lessons/{}", env::var("BECKEND_URL").unwrap(), lesson_id))
+       .get(&url)
        .send()
        .await {
-        Ok(response) => response.json().await.unwrap(),
+        Ok(response) => {
+            let text = response.text().await.unwrap_or_default();
+            log::info!("Ответ от сервера: {}", text);
+            match serde_json::from_str::<Lesson>(&text) {
+                Ok(lesson) => lesson,
+                Err(e) => {
+                    log::error!("Ошибка при десериализации урока: {}", e);
+                    log::error!("Текст ответа: {}", text);
+                    Lesson::default()
+                }
+            }
+        },
         Err(e) => {
             log::error!("Ошибка при запросе урока: {e}");
             Lesson::default()
