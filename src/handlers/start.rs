@@ -12,6 +12,7 @@ pub enum CallbackType {
     Lesson,
     Practice,
     LessonPractice,
+    Textbooks,
     // Test,
     Unknown,
 }
@@ -46,8 +47,9 @@ pub async fn handle_callback_query(bot: Bot, query: CallbackQuery) ->  ResponseR
         CallbackType::Lesson => handle_callback_lesson(bot, query).await?,
         CallbackType::Practice => handle_callback_practice(bot, query).await?,
         CallbackType::LessonPractice => handle_callback_lesson_practice(bot, query).await?,
+        CallbackType::Textbooks => handle_callback_textbooks_pdf(bot, query).await?,
         CallbackType::Unknown => {}
     }
-
+    
     Ok(())
 }

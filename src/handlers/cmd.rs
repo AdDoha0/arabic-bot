@@ -1,5 +1,5 @@
-use teloxide::dispatching::dialogue::GetChatId;
 use teloxide::{prelude::*, utils::command::BotCommands};
+use teloxide::types::InputFile;
 
 use crate::keyboard::inline_keyboard::create_inline_keyboard_meeting_button;
 // use crate::ai::{create_practice::CreatePractice, gpt_client::GetResultApiAi};
@@ -24,6 +24,9 @@ pub async fn command_handler(bot: Bot, msg: Message, cmd: Command) -> ResponseRe
             bot.send_message(msg.chat.id, text).await?;
         }
         Command::Start => {
+
+            let patch_image = InputFile::file("src/assets/image/start_image_v1.jpg");
+
             let text  = "
                 Ассаляму алейкум! 🌙
 
@@ -36,7 +39,8 @@ pub async fn command_handler(bot: Bot, msg: Message, cmd: Command) -> ResponseRe
             ".to_string();
             let keyboard = create_inline_keyboard_meeting_button();
 
-            bot.send_message(msg.chat.id, text)
+            bot.send_photo(msg.chat.id, patch_image)
+                .caption(&text)
                 .reply_markup(keyboard)
                 .await?;
         }

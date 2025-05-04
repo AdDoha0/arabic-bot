@@ -1,16 +1,16 @@
 use teloxide::{
-    prelude::*,
-    types::{CallbackQuery, Message}
+    dispatching::dialogue::GetChatId, prelude::*, types::{CallbackQuery, InputFile, Message}
 };
 use reqwest;
 use std::env;
 use teloxide::RequestError;
 use std::io;
 
+
 use crate::{ai::gpt_client::GptClient, keyboard::inline_keyboard::*};
 use crate::utils::user_data::{save_user_lesson};
 use crate::serializers::{Lesson};
-use crate::utils::load_context;
+use crate::utils::auxiliary_fn::{load_context, list_files_in_dir};
 
 
 use crate::ai::create_practice::CreatePractice;
@@ -178,3 +178,35 @@ pub async fn handle_callback_lesson_practice(bot: Bot, query: CallbackQuery) -> 
     Ok(())
 }
 
+
+
+
+
+
+// ------------------------Ui-----------------------------
+
+
+
+
+
+
+
+pub async fn handle_callback_textbooks_pdf(bot: Bot, query: CallbackQuery) -> ResponseResult<()> {
+
+    let file_paths = list_files_in_dir("src/assets/textbooks");
+
+    if let Some(message) = query.message {
+
+        bot.send_message(message.chat().id, r#"
+        Вот подборка учебников по арабскому языку. Они подойдут как для начинающих,
+        так и для тех, кто уже делает успехи. Изучай в удобном темпе — и пусть Аллах1
+        облегчит тебе путь к знанию! 🤲
+        "#).await?;
+        
+        for path in file_paths {
+            bot.send_document(message.chat().id, InputFile::file(path)).await?;
+        };
+
+    }
+    Ok(())
+}
