@@ -1,10 +1,9 @@
 use teloxide::prelude::*;
 use teloxide::types::{InlineKeyboardButton, InlineKeyboardMarkup};
-use teloxide::types::ReplyMarkup;
 use reqwest;
 use std::env;
 
-use crate::serializers::{Textbook, LessonId, Lesson};
+use crate::serializers::{Textbook, Lesson};
 
 
 pub fn create_inline_keyboard_meeting_button() -> InlineKeyboardMarkup {

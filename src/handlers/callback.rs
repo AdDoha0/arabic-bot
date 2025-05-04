@@ -100,7 +100,7 @@ pub async fn handle_callback_lesson(bot: Bot, query: CallbackQuery) ->  Response
 
     if let Some(message) = query.message {
         let chat_id = message.chat().id.0;
-
+        
         // Сохраняем ID урока и его текст
         if let Some(data) = &query.data {
             if let Err(e) = save_user_lesson(chat_id, data.clone(), lesson.text.clone()) {
@@ -136,6 +136,7 @@ pub async fn handle_callback_practice(bot: Bot, query: CallbackQuery) ->  Respon
 
 
 pub async fn handle_callback_lesson_practice(bot: Bot, query: CallbackQuery) -> ResponseResult<()> {
+
 
     if let Some(message) = query.message {
         // Отправляем сообщение "Пожалуйста, подождите..." и сохраняем его чтоб удалить его позже

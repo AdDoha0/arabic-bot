@@ -14,7 +14,7 @@ use std::env;
 pub trait GptClient {
     async fn build_request(&self, prompt: &str, context: &str) -> CompletionRequest {
         let model = env::var("AI_MODEL").expect("AI_MODEL not set");
-
+        
         CompletionRequest {
             model,
             messages: vec![
@@ -42,8 +42,18 @@ pub trait GptClient {
             .send()
             .await?;
 
-        let result = response.json::<CompletionResponse>().await?;
+         // Получаем тело ответа как строку
+        let text = response.text().await?;
+
+        // Логируем необработанный JSON
+        log::info!("AI raw response: {}", text);
+
+        // Парсим строку в структуру
+        let result: CompletionResponse = serde_json::from_str(&text)?;
         Ok(result)
+
+        // let result = response.json::<CompletionResponse>().await?;
+        // Ok(result)
     }
 
     async fn get_completion(&self, prompt: &str, context: &str) -> Result<String, anyhow::Error> {
