@@ -1,5 +1,5 @@
 use teloxide::{
-    dispatching::dialogue::GetChatId, prelude::*, types::{CallbackQuery, InputFile, Message}
+    prelude::*, types::{CallbackQuery, InputFile, Message}
 };
 use reqwest;
 use std::env;
@@ -8,8 +8,8 @@ use std::io;
 
 
 use crate::{ai::gpt_client::GptClient, keyboard::inline_keyboard::*};
-use crate::utils::user_data::{save_user_lesson};
-use crate::serializers::{Lesson};
+use crate::utils::user_data::save_user_lesson;
+use crate::serializers::Lesson;
 use crate::utils::auxiliary_fn::{load_context, list_files_in_dir};
 
 
@@ -17,25 +17,30 @@ use crate::ai::create_practice::CreatePractice;
 use crate::utils::user_data::get_user_lesson_text;
 
 
-// Обработчик для кнопки начала обучения
-pub async fn handle_callback_meeting(bot: Bot, query: CallbackQuery) ->  ResponseResult<()> {
+
+
+pub async fn handle_callback_сhoosing_volume(bot: Bot, query: CallbackQuery) ->  ResponseResult<()> {
 
     if let Some(message) = query.message {
         let keyboard = create_inline_keyboard_сhoosing_volume().await;
-        bot.send_message(message.chat().id, "Выберите действие:")
-            .reply_markup(keyboard)
+
+        bot.send_message(message.chat().id, "📚 Выберите учебник, чтобы получить конспекты")
+            .reply_markup(keyboard)        
             .await?;
-    } else {
-        log::warn!("В колбэке отсутствует сообщение");
+
     }
+
+
 
     Ok(())
 }
 
+
+
 // Обработчик для выбора тома
 pub async fn handle_callback_volume(bot: Bot, query: CallbackQuery) ->  ResponseResult<()> {
 
-
+    
     let textbook_id = query.data
             .as_ref()
             .map(|data| {
@@ -51,7 +56,10 @@ pub async fn handle_callback_volume(bot: Bot, query: CallbackQuery) ->  Response
             bot.send_message(message.chat().id, "Выберите урок для тома")
                 .reply_markup(keyboard)
                 .await?;
+    } else {
+        log::warn!("Ошибка в колбеке handle_callback_volume");
     }
+
     Ok(())
 }
 
@@ -108,6 +116,12 @@ pub async fn handle_callback_lesson(bot: Bot, query: CallbackQuery) ->  Response
             }
         }
 
+        
+        if let Some(video) = &lesson.video_url {
+            bot.send_message(message.chat().id, video)
+                .await?;
+        } 
+
         bot.send_message(message.chat().id, lesson.text)
             // .parse_mode(teloxide::types::ParseMode::MarkdownV2)
             .await?;
@@ -116,7 +130,11 @@ pub async fn handle_callback_lesson(bot: Bot, query: CallbackQuery) ->  Response
         bot.send_message(message.chat().id, "Хотите практику по этому уроку?")
             .reply_markup(practice_keyboard)
             .await?;
+    } else {
+        log::warn!("Ошибка в колбеке handle_callback_lesson");
     }
+
+
 
     Ok(())
 }
@@ -129,7 +147,10 @@ pub async fn handle_callback_practice(bot: Bot, query: CallbackQuery) ->  Respon
         // В будущем тут можно добавить логику для разных типов практики
         bot.send_message(message.chat().id, format!("Вы выбрали практику"))
             .await?;
+    } else {
+        log::warn!("Ошибка в колбеке handle_callback_practice");
     }
+
 
     Ok(())
 }
@@ -173,6 +194,35 @@ pub async fn handle_callback_lesson_practice(bot: Bot, query: CallbackQuery) -> 
         bot.send_message(message.chat().id, response)
            .await?;
 
+    } else {
+        log::warn!("Ошибка в колбеке handle_callback_lesson_practice");
+    }
+
+    Ok(())
+}
+
+
+// ------------------------Ui-----------------------------
+
+
+pub async fn handle_callback_meeting(bot: Bot, query: CallbackQuery) ->  ResponseResult<()> {
+
+    if let Some(message) = query.message {
+
+        let keyboard = create_сinline_keyboar_action();
+        
+        bot.send_message(message.chat().id, "📚 Материалы для изучения арабского языка:
+Ты можешь выбрать, с чего начать:
+
+🔹 Конспекты — краткие, структурированные материалы для быстрого повторения и понимания.
+🔹 Книги — полноценные учебники для глубокого и системного изучения языка.
+
+Выбери нужный вариант ниже 👇
+        ")
+            .reply_markup(keyboard)
+            .await?;
+    } else {
+        log::warn!("Ошибка в коллбеке handle_callback_meeting");
     }
 
     Ok(())
@@ -180,33 +230,14 @@ pub async fn handle_callback_lesson_practice(bot: Bot, query: CallbackQuery) -> 
 
 
 
-
-
-
-// ------------------------Ui-----------------------------
-
-
-
-
-
-
-
 pub async fn handle_callback_textbooks_pdf(bot: Bot, query: CallbackQuery) -> ResponseResult<()> {
-
-    let file_paths = list_files_in_dir("src/assets/textbooks");
 
     if let Some(message) = query.message {
 
-        bot.send_message(message.chat().id, r#"
-        Вот подборка учебников по арабскому языку. Они подойдут как для начинающих,
-        так и для тех, кто уже делает успехи. Изучай в удобном темпе — и пусть Аллах1
-        облегчит тебе путь к знанию! 🤲
-        "#).await?;
+        bot.send_message(message.chat().id, "Вот подборка учебников по арабскому языку
+Они подойдут как для начинающих, так и для тех, кто уже делает успехи. Изучай в удобном темпе — и пусть Аллах облегчит тебе путь к знанию! 🤲
+t.me/test24354 👈 тыкай сюда").await?;
         
-        for path in file_paths {
-            bot.send_document(message.chat().id, InputFile::file(path)).await?;
-        };
-
-    }
+    } 
     Ok(())
 }

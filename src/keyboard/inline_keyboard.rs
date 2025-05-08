@@ -19,7 +19,6 @@ pub fn create_inline_keyboard_meeting_button() -> InlineKeyboardMarkup {
 
 
 
-
 pub async fn create_inline_keyboard_сhoosing_volume() -> InlineKeyboardMarkup{
 
     let mut url = env::var("BECKEND_URL").expect("BECKEND_URL is not set");
@@ -53,7 +52,6 @@ pub async fn create_inline_keyboard_сhoosing_volume() -> InlineKeyboardMarkup{
 
     InlineKeyboardMarkup::new(keyboard)
 }
-
 
 
 
@@ -124,6 +122,20 @@ pub fn create_inline_keyboar_lesson_practice() -> InlineKeyboardMarkup {
 
 }
 
+
+
+
+pub fn create_сinline_keyboar_action() -> InlineKeyboardMarkup {
+    
+    let button1 = InlineKeyboardButton::callback("Книги (pdf) 📚", "pdf");
+    let button2 = InlineKeyboardButton::callback("Конспекты 📝", "choising_volume");
+
+    let row1 = vec![button1];
+    let row2 = vec![button2];
+
+    InlineKeyboardMarkup::new(vec![row1, row2])
+
+}
 
 
 
